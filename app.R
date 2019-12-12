@@ -1,37 +1,27 @@
+# Setup -------------------------------------------------------------------
+
 library(tidyverse)
 library(shiny)
 library(shinythemes)
 library(here)
 library(overlap)
-library(maptools)
-library(lubridate)
+
+setwd(here::here("shiny-rai"))
 
 # import record table
-records <- read_csv(here::here('data', 'raw-data', 'recordtable_year1and2_15min.csv'))
+records <- read_csv("recordtable_allrecordscleaned_speciesmetadata.csv")
+records$Date <- as.Date(records$Date)
 
-# bring in species traits
-#species <- read_csv(here::here('data', '2018spp_kingdon.csv'))
+# import camera operation spreadsheet
+camera_operation <- read_csv("Camera_operation_years1and2.csv") %>%
+ mutate_at(c("Start", "End", "Problem1_from", "Problem1_to",
+             "Problem2_from", "Problem2_to", "Problem3_from", "Problem3_to"),
+           ~as.Date(., format = "%m/%d/%y"))
 
-##################################################################################################
-#  Format and scale times
-##################################################################################################
+# join records and camera operation
+records <- left_join(records, camera_operation)
 
-# set spatial coordinates
-coords <- matrix(c(34.50, -18.82), nrow=1)
-Coords <- sp::SpatialPoints(coords,
-                            proj4string=sp::CRS("+proj=longlat +datum=WGS84"))
-
-# specify date format
-records$Date <- as.POSIXct(records$Date, tz = "Africa/Maputo")
-
-# convert time to radians (could be done more efficiently with pipe)
-records$Time.Corrected <- hms(records$Time)
-records$Time.Decimal <- records$Time.Corrected$hour + records$Time.Corrected$minute/60 + records$Time.Corrected$second/3600
-records$Time.Scaled <- records$Time.Decimal / 24
-records$Time.Radians <- records$Time.Scaled * 2 * pi
-# calculate suntime using function from overlap package, and coordinates and dates as formatted above
-records$Time.Sun <- sunTime(records$Time.Radians, records$Date, Coords)
-
+# define timeplot function
 timeplot <-function (A, n.grid = 128, kmax = 3, linecol = "#00BFC4",  ...) 
 {
   
@@ -51,44 +41,109 @@ timeplot <-function (A, n.grid = 128, kmax = 3, linecol = "#00BFC4",  ...)
   return(invisible(list(x = xx, densityA = densA)))
 }
 
-#####################
+
+# UI ----------------------------------------------------------------------
 
 ui <- fluidPage(
   theme = shinytheme("slate"),
-  titlePanel("I am adding a title!"),
-  sidebarLayout(
-    sidebarPanel("put my widgets here",
-                 selectInput(inputId = "species_select",
-                             label = "Choose a species:",
-                             choices = unique(records$Species)
-                 ),
-                 selectInput(inputId = "camera_select",
-                              label = "Choose camera:",
-                              choices = unique(records$Camera))
-    ),
-    mainPanel("put my outputs here",
-              p("Activity pattern:"),
-              plotOutput(outputId = "activity_plot")
+  navbarPage("Gorongosa Camera Traps",
+  
+    tabPanel("By Species",
+        sidebarLayout(
+          sidebarPanel("",
+                       numericInput(inputId = "independent_min",
+                                   label = "Set quiet period for independent detections (minutes):",
+                                   value = 15,
+                                   min = 0,
+                                   max = 1440),
+                       
+                       dateRangeInput(inputId = "date_range1",
+                                      label = "Date Range:",
+                                      start = "2016-06-01",
+                                      end = "2017-09-30"),
+                       
+                       selectInput(inputId = "species_select",
+                                   label = "Choose a species:",
+                                   choices = unique(records$CommName_Full))
+          ),
+          
+          mainPanel("",
+                    #p(""),
+                    #tableOutput(outputId = "species_table"),
+                    p("Diel activity pattern:"),
+                    plotOutput(outputId = "activity_plot")
+          )
+        )
+      ),
+    tabPanel("By Camera",
+             sidebarLayout(
+               sidebarPanel("",
+                            selectInput(inputId = "camera_select",
+                                        label = "Choose a camera:",
+                                        choices = unique(records$Camera))
+               ),
+               
+               mainPanel("",
+                         p(""),
+                         tableOutput(outputId = "camera_table")
+               )
+             )
+        )
     )
-  )
 )
 
 
 
-### SERVER
+
+# Server ------------------------------------------------------------------
 
 server <- function(input, output) {
- 
-  # create reactive object species_suntime that changes based on species_select widget selection 
-  species_suntime <- reactive({
+  
+  records_subset <- reactive({
     records %>%
-      filter(Species == input$species_select) %>%
-      select(Time.Sun)
+      filter(delta.time.secs == 0 | delta.time.secs >= (60 * input$independent_min),
+      Date >= input$date_range1[1], Date <= input$date_range1[2])
+  })
+  
+  # create reactive object species_subset that changes based on species_select widget selection 
+  species_subset <- reactive({
+    records_subset() %>%
+      filter(CommName_Full == input$species_select)
+  })
+
+  # summarize species counts across cameras
+  species_summary <- reactive({
+    species_subset() %>%
+      group_by(Camera) %>%
+      summarise(count = n())
+  })
+  
+  # render a reactive table that shows a summary
+  output$species_table <- renderTable({
+    species_summary()
+  })
+  
+  # create reactive object camera_subset that changes based on camera_select widget selection 
+  camera_subset <- reactive({
+    records_subset() %>%
+      filter(Camera == input$camera_select)
+  })
+  
+  # summarize species counts across species
+  camera_summary <- reactive({
+    camera_subset() %>%
+      group_by(CommName_Full) %>%
+      summarise(count = n())
+  })
+  
+  # render a reactive table that shows a summary
+  output$camera_table <- renderTable({
+    camera_summary()
   })
   
   # render a reactive graph with the activity patterns of the selected species
   output$activity_plot <- renderPlot({
-    timeplot(as.numeric(species_suntime))
+    timeplot(species_subset()$Time.Sun)
   })
   
 }
