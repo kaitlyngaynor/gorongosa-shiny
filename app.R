@@ -1,3 +1,5 @@
+# Gorongosa Camera Trap Data Exploration
+
 # Setup -------------------------------------------------------------------
 
 library(tidyverse)
