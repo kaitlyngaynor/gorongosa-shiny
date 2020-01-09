@@ -2,7 +2,7 @@
 
 # Server
 
-server <- function(input, output) {
+server <- function(input, output, session) {
   
   # Subset based on widgets -------------------------------------------------
   
@@ -64,5 +64,3 @@ server <- function(input, output) {
   })
   
 }
-
-shinyApp(ui = ui, server = server)
