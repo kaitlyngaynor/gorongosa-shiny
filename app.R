@@ -1,4 +1,5 @@
 # Gorongosa Camera Trap Data Exploration
+# Archived markdown app
 
 # Setup -------------------------------------------------------------------
 
