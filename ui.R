@@ -13,15 +13,10 @@ source("global.R")
 sidebar <- dashboardSidebar(
   
   sidebarMenu(
+    menuItem("Overview", tabName = "overview"),
     menuItem("By Species", tabName = "species"),
     menuItem("Species Comparison", tabName = "species_compare")
   ),
-  
-  numericInput(inputId = "independent_min",
-               label = "Set quiet period for independent detections (minutes):",
-               value = 15,
-               min = 0,
-               max = 1440),
   
   tags$footer(
     p(
@@ -48,6 +43,27 @@ sidebar <- dashboardSidebar(
 body <- dashboardBody(
   
   tabItems(
+    
+
+# Overview ----------------------------------------------------------------
+
+    tabItem(
+      
+      tabName = "overview",
+      
+      fluidRow(
+        box(width = 12,
+          h1("Gorongosa Camera Traps"),
+          "A description of the camera trap project will go here")
+      ),
+      
+      fluidRow(
+        box(width = 6,
+            title = "Map of cameras",
+            "put a map here")
+      )
+      
+    ),
 
 # By species --------------------------------------------------------------
   
@@ -67,7 +83,13 @@ body <- dashboardBody(
           
           selectInput(inputId = "species_select",
                       label = "Choose a species:",
-                      choices = unique(records$CommName_Full))
+                      choices = unique(records$CommName_Full)),
+          
+          numericInput(inputId = "independent_min",
+                       label = "Set quiet period for independent detections (minutes):",
+                       value = 15,
+                       min = 0,
+                       max = 1440)
         ),
         
         box(
@@ -78,6 +100,7 @@ body <- dashboardBody(
           
         )
       )
+        
     ),
   
   # Species comparison ------------------------------------------------------
@@ -104,7 +127,7 @@ body <- dashboardBody(
 # Dashboard ---------------------------------------------------------------
 
 dashboardPage(
-  dashboardHeader(title = "Gorongosa cameras"),
+  dashboardHeader(title = "GNP Cameras"),
   sidebar,
   body
 )
@@ -125,3 +148,13 @@ dashboardPage(
 #               )
 #             )
 #    )
+
+
+# not working - not reactive yet
+
+#  fluidRow(
+#    map_ui(
+#      id = "richness_map",
+#      sub_title_text = "Subtitle text goes here."
+#    )
+#  )
