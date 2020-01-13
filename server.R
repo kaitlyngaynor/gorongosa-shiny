@@ -35,16 +35,30 @@ server <- function(input, output, session) {
       summarise(count = n())
   })
   
-  
-  
-  
+
   # summarize species counts across species
   camera_summary <- reactive({
     camera_subset() %>%
       group_by(CommName_Full) %>%
       summarise(count = n())
   })
+
+
+  # Map outputs -------------------------------------------------------------
+
+  # not sure how to do this because the map should be reactive... hmmmmm. May need to try outside of map card.
   
+  # richness map
+#  callModule(
+#    card_map,
+#    "richness_map",
+#    data = species_summary(),
+#    field = "count",
+#    legend_title = "Species Richness",
+#    popup_title = "Count:",
+#    popup_add_field = "Camera",
+#    popup_add_field_title = ""
+#  )
   
   # Render outputs ----------------------------------------------------------
   
