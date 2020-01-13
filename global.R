@@ -7,8 +7,27 @@ library(overlap)
 library(plotly)
 library(here)
 library(shinydashboard)
+library(leaflet)
 
 setwd(here::here("shiny-rai"))
+
+source("modules/map_card.R")
+
+# source custom functions
+files.sources = list.files("functions", full.names = T)
+sapply(files.sources, source)
+
+# no scientific notation and round to 2 decimals
+options(scipen = 999,
+        digits = 2)
+
+
+# Data import -------------------------------------------------------------
+
+# import shapefile
+hexes <- sf::st_read("shapefile", "CameraGridHexes", quiet = T) %>%
+  sf::st_transform(crs = '+proj=longlat +datum=WGS84') %>%
+  rename(Camera = StudySite) # records and camera_operation use "Camera" not "StudySite" so this allows them to join
 
 # import record table
 records <- read_csv("recordtable_allrecordscleaned_speciesmetadata.csv")
