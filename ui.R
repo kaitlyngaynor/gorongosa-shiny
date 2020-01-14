@@ -54,13 +54,18 @@ body <- dashboardBody(
       fluidRow(
         box(width = 12,
           h1("Gorongosa Camera Traps"),
-          "A description of the camera trap project will go here")
+          "This dashboard facilitates exploration of the first two years of camera trap data (mid-2016 through mid-2018) 
+          from the systematic grid in Gorongosa National Park, Mozambique. I (Kaitlyn Gaynor) collected 
+          and classified these data as part of my PhD research at the University of California - Berkeley.")
       ),
       
       fluidRow(
-        box(width = 6,
-            title = "Map of cameras",
-            "put a map here")
+        box(width = 12,
+            title = "Study area in Gorongosa National Park",
+            status = "primary",
+            div(img(src="https://panoptes-uploads.zooniverse.org/production/project_attached_image/43552c76-4867-4d3f-b1d7-e4d2e263026a.png", 
+                    width=600), style = "text-align: center;")
+            )
       )
       
     ),
@@ -72,33 +77,59 @@ body <- dashboardBody(
       tabName = "species",
       
       fluidRow(
+        box(h2("INDIVIDUAL SPECIES PATTERNS"), width = 12)
+      ),
+      
+      fluidRow(
         
         box(
-          title = "Subset records:",
+          title = "Choose a species:",
+          
+          selectInput(inputId = "species_select",
+                      label = "",
+                      choices = sort(unique(records$CommName_Full)))
+        ),
+        
+        box(
+          title = "Subset records further (optional)",
           
           dateRangeInput(inputId = "date_range1",
                          label = "Date Range:",
-                         start = "2016-06-01",
-                         end = "2017-09-30"),
-          
-          selectInput(inputId = "species_select",
-                      label = "Choose a species:",
-                      choices = unique(records$CommName_Full)),
+                         start = "2016-06-23",
+                         end = "2018-09-15"),
+          "The first camera was set on June 23, 2016, and the last camera was checked on September 15, 2018. No individual camera was operable for this entire period.",
+          br(),
+          br(),
           
           numericInput(inputId = "independent_min",
                        label = "Set quiet period for independent detections (minutes):",
                        value = 15,
                        min = 0,
-                       max = 1440)
-        ),
-        
-        box(
-          
-          title = "Diel activity pattern",
-          
-          plotOutput(outputId = "activity_plot")
-          
+                       max = 1440),
+          "Records of a given species will only be counted as one detection if they occur within the set quiet period. 
+          This setting addresses bias caused by a single animal sitting in front of a camera for a long period of time and repeatedly triggering the camera. 
+          The default setting is 15 minutes."
         )
+
+      ),
+      
+      fluidRow(
+        
+        box(title = "Diel activity pattern",
+            "Kernel density distribution of the timing of the detections across all cameras across the 24-hour period. All times are scaled to solar time based on the date of the detection.",
+            plotOutput(outputId = "activity_plot")
+            ),
+        
+        box(title = "RAI vs variable",
+            "to go here")
+      ),
+      
+      fluidRow(
+        
+        box(title = "RAI output",
+            tableOutput(outputId = "rai_table")
+            )
+        
       )
         
     ),
