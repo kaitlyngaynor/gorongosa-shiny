@@ -42,6 +42,11 @@ server <- function(input, output, session) {
       group_by(CommName_Full) %>%
       summarise(count = n())
   })
+  
+  # calculate RAI
+  rai <- reactive({
+    rai.calculate(records_subset(), camera_operation_matrix, input$date_range1[1], input$date_range1[2])
+  })
 
 
   # Map outputs -------------------------------------------------------------
@@ -70,6 +75,12 @@ server <- function(input, output, session) {
   # render a reactive table that shows a summary by camera
   output$camera_table <- renderTable({
     camera_summary()
+  })
+
+  # render a reactive table that shows RAI of selected species at each camera
+  output$rai_table <- renderTable({
+    rai() %>%
+      filter(Species == input$species_select)
   })
   
   # render a reactive graph with the activity patterns of the selected species
