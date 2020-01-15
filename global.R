@@ -52,9 +52,10 @@ sq_map <- get_map(location = sbbox, maptype = "terrain", source = "stamen")
 #urema <- readOGR("shapefile", "lake_urema_latlong") %>% 
 #  spTransform(CRS("+proj=utm +south +zone=36 +ellps=WGS84")) 
 
-# import record table
-records <- read_csv("recordtable_allrecordscleaned_speciesmetadata.csv")
+# import record table (vroom is much faster than read_csv!)
+records <- vroom("recordtable_allrecordscleaned_speciesmetadata.csv", delim = ",")
 records$Date <- as.Date(records$Date)
+
 
 # strip just month
 records$Month_Year <- format(as.Date(records$Date), "%Y-%m")
