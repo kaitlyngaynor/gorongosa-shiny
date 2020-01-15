@@ -60,7 +60,7 @@ server <- function(input, output, session) {
   output$rai_map <- renderPlotly({
     ggplotly(
       ggmap(sq_map) + 
-        geom_polygon(hexes.df.rai(), mapping = aes(long, lat, group = group, fill = RAI)) +
+        geom_polygon(hexes.df.rai(), mapping = aes(long, lat, group = group, fill = RAI, label = id)) +
         coord_equal() +
         scale_fill_viridis(name='RAI') +
         theme_void() +
@@ -91,8 +91,11 @@ server <- function(input, output, session) {
   output$rai_metadata <- renderPlotly({
     x_axis <- input$metadata_select
     ggplotly(ggplot(data = rai_metadata(),
-           aes_string(x = x_axis, y = "RAI")) +
-      geom_point())
+           aes_string(x = x_axis, y = "RAI", label = "Camera")) +
+      geom_point() +
+      geom_smooth(method = "lm", col = "gray") +
+      theme_bw()
+      )
   })
   
   # render a reactive graph with RAI every month
@@ -100,7 +103,8 @@ server <- function(input, output, session) {
     ggplotly(ggplot(data = (monthly_rai() %>% filter(Species == input$species_select, Camera == "All")),
            aes(x = Month_Year, y = RAI)) +
       geom_bar(stat = "identity") +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1)))
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+      )
   })
   
   # render a reactive graph with the activity patterns of the selected species
