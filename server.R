@@ -55,17 +55,15 @@ server <- function(input, output, session) {
   # Map outputs -------------------------------------------------------------
   
   # merge camera DF with RAI
-  hexes.df.rai <- reactive({merge(hexes.df, rai_species())})
+  hexes.df.rai <- reactive({left_join(hexes.df, rai_species(), by = c("id" = "Camera"))})
   
-  hexes.df.rai.plot <- reactive({merge(hexes.df.rai(), hexes, by.x = "id", by.y = "polyID")})
-  
-  output$rai_map <- renderPlot({
-    ggplot(hexes.df.rai.plot(), aes(long, lat, group = group, fill = RAI)) + 
+  output$rai_map <- renderPlotly({
+    ggplotly(ggplot(hexes.df.rai(), aes(long, lat, group = group, fill = RAI, label = id)) + 
       geom_polygon() +
       coord_equal() +
       scale_fill_viridis(name='RAI') +
       theme_void() +
-      theme(legend.position=c(0.05, 0.85))
+      theme(legend.position=c(0.05, 0.85)))
   })
   
   
@@ -78,8 +76,7 @@ server <- function(input, output, session) {
 
   # render a reactive table that shows RAI of selected species at each camera
   output$rai_table <- renderTable({
-    rai() %>%
-      filter(Species == input$species_select)
+    hexes.df.rai()
   })
 
   # render a reactive table that shows monthly RAI of selected species  
@@ -89,19 +86,19 @@ server <- function(input, output, session) {
   })
   
   # render a reactive graph with RAI against other variable
-  output$rai_metadata <- renderPlot({
+  output$rai_metadata <- renderPlotly({
     x_axis <- input$metadata_select
-    ggplot(data = rai_metadata(),
+    ggplotly(ggplot(data = rai_metadata(),
            aes_string(x = x_axis, y = "RAI")) +
-      geom_point() 
+      geom_point())
   })
   
   # render a reactive graph with RAI every month
-  output$monthly_rai_hist <- renderPlot({
-    ggplot(data = (monthly_rai() %>% filter(Species == input$species_select, Camera == "All")),
+  output$monthly_rai_hist <- renderPlotly({
+    ggplotly(ggplot(data = (monthly_rai() %>% filter(Species == input$species_select, Camera == "All")),
            aes(x = Month_Year, y = RAI)) +
       geom_bar(stat = "identity") +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)))
   })
   
   # render a reactive graph with the activity patterns of the selected species
