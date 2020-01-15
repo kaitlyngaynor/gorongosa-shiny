@@ -13,6 +13,8 @@ library(sp)
 library(rgdal)
 library(broom)
 library(viridis)
+library(ggmap)
+library(magrittr)
 
 setwd(here::here("shiny-rai"))
 
@@ -33,14 +35,22 @@ options(scipen = 999) #, digits = 2)
 #  sf::st_transform(crs = '+proj=longlat +datum=WGS84') %>%
 #  rename(Camera = StudySite) 
 
-hexes <- readOGR("shapefile", "CameraGridHexes")
+hexes <- readOGR("shapefile", "CameraGridHexes") %>%
+  spTransform(CRS("+proj=longlat +datum=WGS84")) 
 
 hexes@data %<>%
   rename(Camera = StudySite) # records and camera_operation use "Camera" not "StudySite" so this allows them to join
 
 # get into plottable form
 hexes.df <- broom::tidy(hexes, region = "Camera")
-#hexes$polyID <- sapply(slot(hexes, "polygons"), function(x) slot(x, "ID"))
+
+# generate basemap
+sbbox <- make_bbox(lon = hexes.df$long, lat = hexes.df$lat, f = .1)
+sq_map <- get_map(location = sbbox, maptype = "terrain", source = "stamen")
+
+# import Lake Urema file
+#urema <- readOGR("shapefile", "lake_urema_latlong") %>% 
+#  spTransform(CRS("+proj=utm +south +zone=36 +ellps=WGS84")) 
 
 # import record table
 records <- read_csv("recordtable_allrecordscleaned_speciesmetadata.csv")
