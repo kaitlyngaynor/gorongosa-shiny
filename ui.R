@@ -1,8 +1,5 @@
 # Gorongosa Camera Trap Data Shiny App
 
-## left off being unable to get tabItems to work, following these instructions but failing for some reason:
-# https://rstudio.github.io/shinydashboard/structure.html
-
 # User interface
 
 source("global.R")
@@ -116,7 +113,7 @@ body <- dashboardBody(
         
         box(title = "Map of Relative Activity Index (RAI) across camera grid",
             collapsible = TRUE,
-            plotOutput(outputId = "rai_map"),
+            plotlyOutput(outputId = "rai_map"),
             "Detections per trap-night at each camera. Note that greyed-out hexagons were operable during the selected period."
             ),
         
@@ -129,7 +126,7 @@ body <- dashboardBody(
                                     "pans.100m", "pans.250m", "pans.500m", "lion.dry", 
                                     "lion.wet", "termites.100m", "termites.250m", "termites.500m", "termites.1km")),
             
-            plotOutput(outputId = "rai_metadata"),
+            plotlyOutput(outputId = "rai_metadata"),
             "All covariates have been standardized to have a mean of 0 and standard deviation of 1 in the study area,
             so x-axis units are meaningless.
             Let me know if you are interested in how these data layers were generated."
@@ -147,7 +144,7 @@ body <- dashboardBody(
         
         box(title = "RAI over time",
             collapsible = TRUE,
-            plotOutput(outputId = "monthly_rai_hist")
+            plotlyOutput(outputId = "monthly_rai_hist")
         )
 
       ),
