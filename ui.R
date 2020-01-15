@@ -15,7 +15,7 @@ sidebar <- dashboardSidebar(
   sidebarMenu(
     menuItem("Overview", tabName = "overview"),
     menuItem("By Species", tabName = "species"),
-    menuItem("Species Comparison", tabName = "species_compare")
+    menuItem("Pairwise Comparison", tabName = "pairwise_compare")
   ),
   
   tags$footer(
@@ -84,10 +84,9 @@ body <- dashboardBody(
         
         box(
           title = "Choose a species:",
-          
           selectInput(inputId = "species_select",
                       label = "",
-                      choices = sort(unique(records$CommName_Full)))
+                      choices = sort(unique(records$Species)))
         ),
         
         box(
@@ -95,8 +94,8 @@ body <- dashboardBody(
           
           dateRangeInput(inputId = "date_range1",
                          label = "Date Range:",
-                         start = "2016-06-23",
-                         end = "2018-09-15"),
+                         start = "2016-07-01",
+                         end = "2018-08-31"),
           "The first camera was set on June 23, 2016, and the last camera was checked on September 15, 2018. No individual camera was operable for this entire period.",
           br(),
           br(),
@@ -112,23 +111,58 @@ body <- dashboardBody(
         )
 
       ),
-      
+
+      fluidRow(
+        
+        box(title = "Map of Relative Activity Index (RAI) across camera grid",
+            collapsible = TRUE,
+            plotOutput(outputId = "rai_map"),
+            "Detections per trap-night at each camera. Note that greyed-out hexagons were operable during the selected period."
+            ),
+        
+        box(title = "Environmental covariates of Relative Activity Index",
+            collapsible = TRUE,
+            selectInput(inputId = "metadata_select",
+                        label = "Choose an environmental covariate:",
+                        choices = c("tree.hansen", "termite.large.count.50m", "termite.large.count.100m", "urema.distance", 
+                                    "river.distance", "road.major.distance", "boundary.distance", "fire.interval", 
+                                    "pans.100m", "pans.250m", "pans.500m", "lion.dry", 
+                                    "lion.wet", "termites.100m", "termites.250m", "termites.500m", "termites.1km")),
+            
+            plotOutput(outputId = "rai_metadata"),
+            "All covariates have been standardized to have a mean of 0 and standard deviation of 1 in the study area,
+            so x-axis units are meaningless.
+            Let me know if you are interested in how these data layers were generated."
+        )
+
+      ),
+            
       fluidRow(
         
         box(title = "Diel activity pattern",
+            collapsible = TRUE,
             "Kernel density distribution of the timing of the detections across all cameras across the 24-hour period. All times are scaled to solar time based on the date of the detection.",
             plotOutput(outputId = "activity_plot")
             ),
         
-        box(title = "RAI vs variable",
-            "to go here")
+        box(title = "RAI over time",
+            collapsible = TRUE,
+            plotOutput(outputId = "monthly_rai_hist")
+        )
+
       ),
       
       fluidRow(
         
         box(title = "RAI output",
+            collapsible = TRUE,
             tableOutput(outputId = "rai_table")
-            )
+            )#,
+        
+       # box(title = "Monthly RAI",
+       #     collapsible = TRUE,
+       #     tableOutput(outputId = "monthly_rai_table")
+       #     )
         
       )
         
@@ -138,18 +172,69 @@ body <- dashboardBody(
   
     tabItem(
       
-      tabName = "species_compare",
+      tabName = "pairwise_compare",
+      
+      fluidRow(
+        box(h2("COMPARISON TOOL"), width = 12,
+            "This page enables the comparison of two data subsets. It can be used to compare patterns for a given species across seasons, or compare two species.")
+      ),
       
       fluidRow(
         
         box(
-          title = "TEST:"
+          title = "Data Subset A:",
+          
+          selectInput(inputId = "species_select_A",
+                      label = "Choose species for dataset A:",
+                      choices = sort(unique(records$Species))),
+          
+          dateRangeInput(inputId = "date_range_A",
+                         label = "Date Range:",
+                         start = "2016-07-01",
+                         end = "2018-08-31"),
+
+          numericInput(inputId = "independent_min_A",
+                       label = "Set quiet period for independent detections (minutes):",
+                       value = 15,
+                       min = 0,
+                       max = 1440)
         ),
         
         box(
-          title = "TEST"
+          title = "Data Subset B:",
+          
+          selectInput(inputId = "species_select_A",
+                      label = "Choose species for dataset B:",
+                      choices = sort(unique(records$Species))),
+          
+          dateRangeInput(inputId = "date_range_B",
+                         label = "Date Range:",
+                         start = "2016-07-01",
+                         end = "2018-08-31"),
+          
+          numericInput(inputId = "independent_min_B",
+                       label = "Set quiet period for independent detections (minutes):",
+                       value = 15,
+                       min = 0,
+                       max = 1440)
         )
+      ),
+      
+      fluidRow(
+        box(width = 12, "Comparison figures.")
+      ),
+      
+      fluidRow(
+        
+        box(title = "Diel overlap",
+            collapsible = TRUE,
+            plotOutput(outputId = "activity_plot_compare")),
+        
+        box(title = "Side-by-side trend over time",
+            collapsible = TRUE)
+        
       )
+      
     )
   )
 )
@@ -163,29 +248,3 @@ dashboardPage(
   body
 )
 
-
-
-#    tabPanel("By Camera",
-#             sidebarLayout(
-#               sidebarPanel("",
-#                            selectInput(inputId = "camera_select",
-#                                        label = "Choose a camera:",
-#                                        choices = unique(records$Camera))
-#               ),
-#               
-#               mainPanel("",
-#                         p(""),
-#                         tableOutput(outputId = "camera_table")
-#               )
-#             )
-#    )
-
-
-# not working - not reactive yet
-
-#  fluidRow(
-#    map_ui(
-#      id = "richness_map",
-#      sub_title_text = "Subtitle text goes here."
-#    )
-#  )
