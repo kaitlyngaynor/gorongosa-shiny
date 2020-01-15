@@ -58,12 +58,14 @@ server <- function(input, output, session) {
   hexes.df.rai <- reactive({left_join(hexes.df, rai_species(), by = c("id" = "Camera"))})
   
   output$rai_map <- renderPlotly({
-    ggplotly(ggplot(hexes.df.rai(), aes(long, lat, group = group, fill = RAI, label = id)) + 
-      geom_polygon() +
-      coord_equal() +
-      scale_fill_viridis(name='RAI') +
-      theme_void() +
-      theme(legend.position=c(0.05, 0.85)))
+    ggplotly(
+      ggmap(sq_map) + 
+        geom_polygon(hexes.df.rai(), mapping = aes(long, lat, group = group, fill = RAI)) +
+        coord_equal() +
+        scale_fill_viridis(name='RAI') +
+        theme_void() +
+        theme(legend.position=c(0.05, 0.85))
+      )
   })
   
   
