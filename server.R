@@ -4,6 +4,9 @@
 
 server <- function(input, output, session) {
   
+
+# SINGLE SPECIES ----------------------------------------------------------
+  
   # Subset based on widgets -------------------------------------------------
   
   # create reactive object records_subset that changes based on delta time and date range
@@ -16,17 +19,10 @@ server <- function(input, output, session) {
   # create reactive object species_subset that changes based on species_select widget selection 
   species_subset <- reactive({
     records_subset() %>%
-      filter(CommName_Full == input$species_select)
-  })
-  
-  # create reactive object camera_subset that changes based on camera_select widget selection 
-  camera_subset <- reactive({
-    records_subset() %>%
-      filter(Camera == input$camera_select)
+      filter(Species == input$species_select)
   })
   
   # Summarize subset data ---------------------------------------------------
-  
   
   # summarize species counts across cameras
   species_summary <- reactive({
@@ -35,35 +31,43 @@ server <- function(input, output, session) {
       summarise(count = n())
   })
   
-
-  # summarize species counts across species
-  camera_summary <- reactive({
-    camera_subset() %>%
-      group_by(CommName_Full) %>%
-      summarise(count = n())
-  })
-  
   # calculate RAI
   rai <- reactive({
     rai.calculate(records_subset(), camera_operation_matrix, input$date_range1[1], input$date_range1[2])
   })
+  
+  # subset to species
+  rai_species <- reactive({
+    rai() %>% filter(Species == input$species_select) %>% select(Camera, Count, Operation, RAI)
+  })
+  
+  # calculate monthly RAI
+  monthly_rai <- reactive({
+    rai.monthly(records_subset(), camera_operation_matrix, input$date_range1[1], input$date_range1[2])
+  })
+  
+  # combine RAI and metadata
+  rai_metadata <- reactive({
+    left_join(rai_species(), camera_metadata)
+  })
 
 
   # Map outputs -------------------------------------------------------------
-
-  # not sure how to do this because the map should be reactive... hmmmmm. May need to try outside of map card.
   
-  # richness map
-#  callModule(
-#    card_map,
-#    "richness_map",
-#    data = species_summary(),
-#    field = "count",
-#    legend_title = "Species Richness",
-#    popup_title = "Count:",
-#    popup_add_field = "Camera",
-#    popup_add_field_title = ""
-#  )
+  # merge camera DF with RAI
+  hexes.df.rai <- reactive({merge(hexes.df, rai_species())})
+  
+  hexes.df.rai.plot <- reactive({merge(hexes.df.rai(), hexes, by.x = "id", by.y = "polyID")})
+  
+  output$rai_map <- renderPlot({
+    ggplot(hexes.df.rai.plot(), aes(long, lat, group = group, fill = RAI)) + 
+      geom_polygon() +
+      coord_equal() +
+      scale_fill_viridis(name='RAI') +
+      theme_void() +
+      theme(legend.position=c(0.05, 0.85))
+  })
+  
   
   # Render outputs ----------------------------------------------------------
   
@@ -71,21 +75,76 @@ server <- function(input, output, session) {
   output$species_table <- renderTable({
     species_summary()
   })
-  
-  # render a reactive table that shows a summary by camera
-  output$camera_table <- renderTable({
-    camera_summary()
-  })
 
   # render a reactive table that shows RAI of selected species at each camera
   output$rai_table <- renderTable({
     rai() %>%
       filter(Species == input$species_select)
   })
+
+  # render a reactive table that shows monthly RAI of selected species  
+  output$monthly_rai_table <- renderTable({
+    monthly_rai() %>%
+      filter(Species == input$species_select, Camera == "All")
+  })
+  
+  # render a reactive graph with RAI against other variable
+  output$rai_metadata <- renderPlot({
+    x_axis <- input$metadata_select
+    ggplot(data = rai_metadata(),
+           aes_string(x = x_axis, y = "RAI")) +
+      geom_point() 
+  })
+  
+  # render a reactive graph with RAI every month
+  output$monthly_rai_hist <- renderPlot({
+    ggplot(data = (monthly_rai() %>% filter(Species == input$species_select, Camera == "All")),
+           aes(x = Month_Year, y = RAI)) +
+      geom_bar(stat = "identity") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  })
   
   # render a reactive graph with the activity patterns of the selected species
   output$activity_plot <- renderPlot({
     timeplot(species_subset()$Time.Sun)
   })
+
+# DATASET COMPARISON ----------------------------------------------------------
+  
+
+# Subset based on widgets -------------------------------------------------
+
+  # create reactive object records_subset that changes based on delta time and date range
+  records_subset_A <- reactive({
+    records %>%
+      filter(delta.time.secs == 0 | delta.time.secs >= (60 * input$independent_min),
+             Date >= input$date_range1_A[1], Date <= input$date_range1_A[2])
+  })
+  records_subset_B <- reactive({
+    records %>%
+      filter(delta.time.secs == 0 | delta.time.secs >= (60 * input$independent_min),
+             Date >= input$date_range1_B[1], Date <= input$date_range1_B[2])
+  })
+  
+  # create reactive object species_subset that changes based on species_select widget selection 
+  species_subset_A <- reactive({
+    records_subset_A() %>%
+      filter(Species == input$species_select_A)
+  })
+  species_subset_B <- reactive({
+    records_subset_B() %>%
+      filter(Species == input$species_select_B)
+  })  
+  
+  # render a reactive graph with the activity patterns of the selected species
+  output$activity_plot_compare <- renderPlot({
+    overlapPlot2(species_subset_A()$Time.Sun, species_subset_B()$Time.Sun)
+  })  
   
 }
+
+
+
+# ggplot(data = (RAI.table %>% filter(Species == "Baboon", Camera == "All")),
+# aes(x = Month_Year, y = RAI)) +
+#   geom_bar(stat = "identity")
