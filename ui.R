@@ -113,7 +113,7 @@ body <- dashboardBody(
         
         box(title = "Map of Relative Activity Index (RAI) across camera grid",
             collapsible = TRUE,
-            plotlyOutput(outputId = "rai_map"),
+            leafletOutput(outputId = "rai_map"),
             "Detections per trap-night at each camera. Note that greyed-out hexagons were operable during the selected period."
             ),
         

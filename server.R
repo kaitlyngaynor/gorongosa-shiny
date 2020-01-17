@@ -54,20 +54,36 @@ server <- function(input, output, session) {
 
   # Map outputs -------------------------------------------------------------
   
-  # merge camera DF with RAI
-  hexes.df.rai <- reactive({left_join(hexes.df, rai_species(), by = c("id" = "Camera"))})
-  
-  output$rai_map <- renderPlotly({
-    ggplotly(
-      ggmap(sq_map) + 
-        geom_polygon(hexes.df.rai(), mapping = aes(long, lat, group = group, fill = RAI, label = id)) +
-        coord_equal() +
-        scale_fill_viridis(name='RAI') +
-        theme_void() +
-        theme(legend.position=c(0.05, 0.85))
-      )
+  # merge hexes with RAI
+  hexes_rai <- reactive({
+    full_join(hexes, rai_species())
   })
   
+  # make color palette for map
+  pal <- reactive({
+    colorNumeric(palette = "viridis", domain = hexes_rai()$RAI)
+  })
+  
+  output$rai_map <- renderLeaflet({
+    
+    leaflet(hexes_rai()) %>%
+      setView(34.42, -18.95, 11) %>%
+      addTiles() %>% # or satellite image: addProviderTiles(providers$Esri.WorldImagery)
+      addPolygons(
+        data = hexes_rai(),
+        fillColor = ~pal()(hexes_rai()$RAI),
+        fillOpacity = 1, 
+        weight = 1, # stroke weight of lines
+        color = "gray" # color of lines
+      ) %>% 
+      
+      addLegend_decreasing(pal = pal(), 
+                           values = ~RAI,
+                           opacity = 1, 
+                           title = "RAI",
+                           position = "topleft",
+                           decreasing = TRUE)
+  })
   
   # Render outputs ----------------------------------------------------------
   
