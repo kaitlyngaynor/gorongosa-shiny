@@ -46,4 +46,49 @@ ggplotly(
 )
 
 
+# testing leaflet ---------------------------------------------------------
+
+library(broom)
+library(rgdal)
+library(tidyverse)
+library(magrittr)
+library(leaflet)
+library(sf)
+
+RAI.test <- records %>% 
+  rai.calculate(camera_operation_matrix, "2017-01-01", "2018-01-01") %>%
+  filter(Species == "Waterbuck")
+
+# another way of importing
+hexes <- read_sf("shapefile", "CameraGridHexes") %>%
+  rename(Camera = StudySite) %>%
+  st_transform(crs = "+proj=longlat +datum=WGS84")
+
+# join with RAI
+hexes_rai <- full_join(hexes, RAI.test)
+
+# color brewer
+#pal <- reactive({
+pal <-  colorNumeric(palette = "viridis", domain = hexes_rai$RAI)
+#})
+
+leaflet(hexes_rai) %>%
+  setView(34.42, -18.95, 11) %>%
+  addTiles() %>% # or satellite image: addProviderTiles(providers$Esri.WorldImagery)
+  addPolygons(
+    data = hexes_rai,
+    fillColor = ~pal(hexes_rai$RAI),
+    fillOpacity = 1, 
+    weight = 1, # stroke weight of lines
+    color = "gray" # color of lines
+  ) %>% 
+  addLegend_decreasing(pal = pal, 
+            values = ~RAI,
+            opacity = 1, 
+            title = "RAI",
+            position = "topleft",
+            decreasing = TRUE)
+
+
+
 
