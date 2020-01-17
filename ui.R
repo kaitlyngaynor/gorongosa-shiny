@@ -147,22 +147,8 @@ body <- dashboardBody(
             plotlyOutput(outputId = "monthly_rai_hist")
         )
 
-      ),
-      
-      fluidRow(
-        
-        box(title = "RAI output",
-            collapsible = TRUE,
-            tableOutput(outputId = "rai_table")
-            )#,
-        
-       # box(title = "Monthly RAI",
-       #     collapsible = TRUE,
-       #     tableOutput(outputId = "monthly_rai_table")
-       #     )
-        
       )
-        
+       
     ),
   
   # Species comparison ------------------------------------------------------
