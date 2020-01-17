@@ -1,4 +1,5 @@
 # Gorongosa Camera Trap Data Shiny App
+# test
 
 library(tidyverse)
 library(shiny)
@@ -15,8 +16,9 @@ library(broom)
 library(viridis)
 library(ggmap)
 library(magrittr)
+library(vroom)
 
-setwd(here::here("shiny-rai"))
+#setwd(here::here("shiny-rai"))
 
 #source("modules/map_card.R")
 
