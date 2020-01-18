@@ -166,47 +166,29 @@ rai.calculate <- function(record.table.subset, camop, start.date, end.date) {
   
   # calculate how long the camera was functioning in that time period
   
-    # change start and end date to character
-    start.date <- as.character(start.date)
-    end.date <- as.character(end.date)
-    
-    # sum rows within specified dates (there are 1s when camera was operating, NA when not)
-    camop$Operation <- rowSums(dplyr::select(camop, start.date:end.date), na.rm=TRUE) 
-    
-    # get rid of the individual day columns, just select Camera, Operation
-    camop <- dplyr::select(camop, Camera, Operation) 
-    
+  # change start and end date to character
+  start.date <- as.character(start.date)
+  end.date <- as.character(end.date)
+  
+  # sum rows within specified dates (there are 1s when camera was operating, NA when not)
+  camop$Operation <- rowSums(dplyr::select(camop, start.date:end.date), na.rm=TRUE) 
+  
+  # get rid of the individual day columns, just select Camera, Operation
+  camop <- dplyr::select(camop, Camera, Operation) 
+  
   # calculate number of observations of each classification type at each camera
   record_count <- record.table.subset %>%
-    dplyr::group_by(Species, Camera) %>%
-    dplyr::summarise(Detections = n()) %>%     # counts number of observations of each species
-    spread(key = Species, value = Detections)  # gets from long to wide format  
-  
-  # add columns for classes not present
-  record_count <- add_column(record_count, !!!allclassifications[!names(allclassifications) %in% names(record_count)])
-  
-  # gather data so each class-camera is its own row again
-  record_count <- record_count %>% gather(2:ncol(record_count), key = "Species", value = "Count")
+    dplyr::group_by(Camera) %>%
+    dplyr::summarise(Detections = n())  # counts number of observations of each species
   
   # replace NA with 0 
   record_count[is.na(record_count)] <- 0
-  
-#  # calculate for all cameras combined
-#  record_count_all <- record_count %>%
-#    dplyr::group_by(Species) %>%
-#    dplyr::summarise(Count = sum(Count)) 
-#  
-#  # add "camera" column
-#  record_count_all$Camera <- "All"
-#  
-#  # join the total to the camera
-#  record_count <- dplyr::bind_rows(record_count, record_count_all)
   
   # join camera operation dates and observations
   RAI.table <- plyr::join(record_count, camop)
   
   # calculate RAI
-  RAI.table$RAI <- RAI.table$Count / RAI.table$Operation
+  RAI.table$RAI <- RAI.table$Detections / RAI.table$Operation
   
   # replace infinity with NA
   RAI.table %<>% mutate_if(is.numeric, list(~na_if(., Inf)))
@@ -286,6 +268,75 @@ rai.monthly <- function(record.table.subset, camop, start.date, end.date) {
   
   # calculate number of observations of each classification type at each camera
   record_count <- record.table.subset %>%
+    dplyr::group_by(Camera, Month_Year) %>%
+    dplyr::summarise(Detections = n())  
+  
+  # replace NA with 0 
+  record_count[is.na(record_count)] <- 0
+  
+  # calculate for all cameras combined for each month-year
+  record_count_all <- record_count %>%
+    dplyr::group_by(Month_Year) %>%
+    dplyr::summarise(Detections = sum(Detections)) 
+  
+  # add "camera" column
+  record_count_all$Camera <- "All"
+  
+  # join the total to the camera
+  record_count <- dplyr::bind_rows(record_count, record_count_all)
+  
+  # join camera operation dates and observations
+  RAI.table <- left_join(record_count, camop.subset.monthly.summary)
+  
+  # calculate RAI
+  RAI.table$RAI <- RAI.table$Detections / RAI.table$Operation
+
+  # replace infinity with NA
+  RAI.table %<>% mutate_if(is.numeric, list(~na_if(., Inf)))
+  
+  # merge with season
+  RAI.table <- left_join(RAI.table, seasons)
+  
+  return(RAI.table)
+  
+}
+
+rai.monthly.original <- function(record.table.subset, camop, start.date, end.date) {
+  
+  # calculate how long the camera was functioning in that time period
+  
+  # change start and end date to character
+  start.date <- as.character(start.date)
+  end.date <- as.character(end.date)
+  
+  # selects columns within specified dates
+  camop.subset <- dplyr::select(camop, Camera, start.date:end.date)
+  
+  # transpose data frame
+  camop.subset.monthly <- as_tibble(cbind(names(camop.subset), t(camop.subset)))
+  colnames(camop.subset.monthly) <- as.character(unlist(camop.subset.monthly[1,]))
+  camop.subset.monthly = camop.subset.monthly[-1, ]
+  
+  # fix to make numeric
+  camop.subset.monthly[, 2:ncol(camop.subset.monthly)] %<>% mutate_if(is.character, as.numeric)
+  
+  # sum operation for all cameras
+  camop.subset.monthly$All <- camop.subset.monthly %>%
+    select(-Camera) %>%
+    rowSums(na.rm = TRUE)
+  
+  # add column for just month
+  camop.subset.monthly$Month_Year <- format(as.Date(camop.subset.monthly$Camera), "%Y-%m")
+  
+  # calculate number of operation days for each camera in each month-year
+  camop.subset.monthly.summary <- camop.subset.monthly %>%
+    dplyr::select(-Camera) %>% # drop date (confusingly called camera due to transposing above)
+    pivot_longer(A06:All, names_to = "Camera", values_to = "Operating") %>% # new 'gather' function
+    dplyr::group_by(Camera, Month_Year) %>%
+    dplyr::summarise(Operation = sum(Operating, na.rm = TRUE))
+  
+  # calculate number of observations of each classification type at each camera
+  record_count <- record.table.subset %>%
     dplyr::group_by(Species, Camera, Month_Year) %>%
     dplyr::summarise(Detections = n()) %>%     # counts number of observations of each species
     spread(key = Species, value = Detections)  # gets from long to wide format  
@@ -315,7 +366,7 @@ rai.monthly <- function(record.table.subset, camop, start.date, end.date) {
   
   # calculate RAI
   RAI.table$RAI <- RAI.table$Count / RAI.table$Operation
-
+  
   # replace infinity with NA
   RAI.table %<>% mutate_if(is.numeric, list(~na_if(., Inf)))
   
@@ -325,7 +376,6 @@ rai.monthly <- function(record.table.subset, camop, start.date, end.date) {
   return(RAI.table)
   
 }
-
 
 # Define leaflet legend function ------------------------------------------
 
