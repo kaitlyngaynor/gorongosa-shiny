@@ -13,20 +13,15 @@ server <- function(input, output, session) {
   records_subset <- reactive({
     records %>%
       filter(delta.time.secs == 0 | delta.time.secs >= (60 * input$independent_min),
-             Date >= input$date_range[1], Date <= input$date_range[2])
-  })
-  
-  # create reactive object species_subset that changes based on species_select widget selection 
-  species_subset <- reactive({
-    records_subset() %>%
+             Date >= input$date_range[1], Date <= input$date_range[2]) %>%
       filter(Species == input$species_select)
   })
-  
+
   # Summarize subset data ---------------------------------------------------
   
   # summarize species counts across cameras
   species_summary <- reactive({
-    species_subset() %>%
+    records_subset() %>%
       group_by(Camera) %>%
       summarise(count = n())
   })
@@ -36,11 +31,6 @@ server <- function(input, output, session) {
     rai.calculate(records_subset(), camera_operation_matrix, input$date_range[1], input$date_range[2])
   })
   
-  # subset to species
-  rai_species <- reactive({
-    rai() %>% filter(Species == input$species_select) %>% select(Camera, Count, Operation, RAI)
-  })
-  
   # calculate monthly RAI
   monthly_rai <- reactive({
     rai.monthly(records_subset(), camera_operation_matrix, input$date_range[1], input$date_range[2])
@@ -48,7 +38,7 @@ server <- function(input, output, session) {
   
   # combine RAI and metadata
   rai_metadata <- reactive({
-    left_join(rai_species(), camera_metadata)
+    left_join(rai(), camera_metadata)
   })
 
 
@@ -56,7 +46,7 @@ server <- function(input, output, session) {
   
   # merge hexes with RAI
   hexes_rai <- reactive({
-    full_join(hexes, rai_species())
+    full_join(hexes, rai())
   })
   
   # make color palette for map
@@ -68,7 +58,7 @@ server <- function(input, output, session) {
   map_labels <- reactive({
     sprintf(
     "<strong>Camera: %s</strong><br/>Detections: %i<br/>Days operating: %i<br/>RAI: %g",
-    hexes_rai()$Camera, hexes_rai()$Count, hexes_rai()$Operation, hexes_rai()$RAI, 0) %>% 
+    hexes_rai()$Camera, hexes_rai()$Detections, hexes_rai()$Operation, hexes_rai()$RAI, 0) %>% 
       lapply(htmltools::HTML)
   })
   
@@ -117,7 +107,7 @@ server <- function(input, output, session) {
   # render a reactive table that shows monthly RAI of selected species  
   output$monthly_rai_table <- renderTable({
     monthly_rai() %>%
-      filter(Species == input$species_select, Camera == "All")
+      filter(Camera == "All")
   })
   
   # render a reactive graph with RAI against other variable
@@ -133,7 +123,7 @@ server <- function(input, output, session) {
   
   # render a reactive graph with RAI every month
   output$monthly_rai_hist <- renderPlotly({
-    ggplotly(ggplot(data = (monthly_rai() %>% filter(Species == input$species_select, Camera == "All")),
+    ggplotly(ggplot(data = (monthly_rai() %>% filter(Camera == "All")),
            aes(x = Month_Year, y = RAI, fill = Season)) +
       geom_bar(stat = "identity") +
       scale_fill_manual(values=c("#999999", "#F8766D", "#00BFC4")) +
@@ -143,7 +133,7 @@ server <- function(input, output, session) {
   
   # render a reactive graph with the activity patterns of the selected species
   output$activity_plot <- renderPlot({
-    timeplot(species_subset()$Time.Sun)
+    timeplot(records_subset()$Time.Sun)
   })
 
 # DATASET COMPARISON ----------------------------------------------------------
@@ -194,13 +184,8 @@ server <- function(input, output, session) {
   })
   
   # test tables
-  output$monthly_rai_AB_table <- renderTable({
-    monthly_rai_AB() %>%
-      filter(Camera == "All")
-  })
-  
   output$rai_AB_table <- renderTable({
-    rai_A()
+    rai_B()
   })
   
 # Render outputs for comparison -------------------------------------------
