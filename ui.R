@@ -258,15 +258,15 @@ body <- dashboardBody(
         
         box(title = "Side-by-side trend over time",
             collapsible = TRUE,
-            tableOutput(outputId = "rai_AB_table"))
+            plotlyOutput(outputId = "rai_monthly_AB"))
         
       ),
       
       fluidRow(
         
-        box(title = "Comparison map",
+        box(title = "Table test",
             collapsible = TRUE,
-            "Map showing differences in RAI?"),
+            tableOutput(outputId = "rai_AB_table")),
         
         box(title = "Plot of RAI A vs B",
             collapsible = TRUE,
