@@ -16,9 +16,10 @@ library(viridis)
 library(ggmap)
 library(magrittr)
 library(vroom)
+library(sf)
 
 # setwd() creates problem when trying to publish to shiny.io, so don't run it
-setwd(here::here("shiny-rai"))
+#setwd(here::here("shiny-rai"))
 
 #source("modules/map_card.R")
 
@@ -54,6 +55,20 @@ camera_operation <- read_csv("Camera_operation_years1and2.csv") %>%
 # import camera metadata
 camera_metadata <- read.csv("cam_metadata_norm_031519.csv") %>%
   rename(Camera = StudySite) # records and camera_operation use "Camera" not "StudySite" so this allows them to join
+
+# specify seasons for each month-year
+seasons <- tibble(
+  Month_Year = c("2016-06", "2016-07", "2016-08", "2016-09", "2016-10", "2016-11", "2016-12",
+                 "2017-01", "2017-02", "2017-03", "2017-04", "2017-05",
+                 "2017-06", "2017-07", "2017-08", "2017-09", "2017-10", "2017-11", "2017-12",
+                 "2018-01", "2018-02", "2018-03", "2018-04", "2018-05",
+                 "2018-06", "2018-07", "2018-08", "2018-09", "2018-10", "2018-11", "2018-12"),
+  Season = c("Early Dry", "Early Dry", "Late Dry", "Late Dry", "Late Dry", "Late Dry", "Wet",
+             "Wet", "Wet", "Wet", "Early Dry", "Early Dry",
+             "Early Dry", "Early Dry", "Late Dry", "Late Dry", "Late Dry", "Late Dry", "Wet",
+             "Wet", "Wet", "Wet", "Early Dry", "Early Dry",
+             "Early Dry", "Early Dry", "Late Dry", "Late Dry", "Late Dry", "Late Dry", "Wet")
+)
 
 
 # Data manipulation -------------------------------------------------------
@@ -303,6 +318,9 @@ rai.monthly <- function(record.table.subset, camop, start.date, end.date) {
 
   # replace infinity with NA
   RAI.table %<>% mutate_if(is.numeric, list(~na_if(., Inf)))
+  
+  # merge with season
+  RAI.table <- left_join(RAI.table, seasons)
   
   return(RAI.table)
   
