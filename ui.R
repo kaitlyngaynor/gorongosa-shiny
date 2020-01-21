@@ -244,11 +244,7 @@ body <- dashboardBody(
                        max = 1440)
         )
       ),
-      
-      fluidRow(
-        box(width = 12, "Eventually there will be figures here comparing relative activity between two species and/or seasons, as defined by the user.")
-      ),
-      
+
       fluidRow(
         
         box(title = "Diel overlap",
@@ -264,11 +260,10 @@ body <- dashboardBody(
       
       fluidRow(
         
-        box(title = "Table test",
-            collapsible = TRUE,
-            tableOutput(outputId = "rai_AB_table")),
-        
         box(title = "Plot of RAI A vs B",
+            radioButtons(inputId = "log_select", label = "Switch to log scale",
+                         choices = list("RAI" = 1, "log(RAI)" = 2), 
+                         selected = 1),
             collapsible = TRUE,
             plotlyOutput(outputId = "rai_AB")
             )
