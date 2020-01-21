@@ -153,6 +153,9 @@ body <- dashboardBody(
         
         box(title = "Map of Relative Activity Index (RAI) across camera grid",
             collapsible = TRUE,
+            radioButtons(inputId = "log_select_map", label = "Switch to log scale",
+                         choices = list("RAI" = 1, "log(RAI)" = 2), 
+                         selected = 1),
             leafletOutput(outputId = "rai_map"),
             "Detections per trap-night at each camera. Note that greyed-out hexagons were not operable during the selected period."
             ),
