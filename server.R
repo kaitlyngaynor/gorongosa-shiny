@@ -175,17 +175,13 @@ server <- function(input, output, session) {
     cbind(rai.monthly(records_subset_A(), camera_operation_matrix, input$date_range_A[1], input$date_range_A[2]),
           Subset = "A")
   })
+  
   monthly_rai_B <- reactive({
     cbind(rai.monthly(records_subset_B(), camera_operation_matrix, input$date_range_B[1], input$date_range_B[2]),
           Subset = "B")
   })
   monthly_rai_AB <- reactive({
     bind_rows(monthly_rai_A(), monthly_rai_B())
-  })
-  
-  # test tables
-  output$rai_AB_table <- renderTable({
-    rai_B()
   })
   
 # Render outputs for comparison -------------------------------------------
@@ -197,12 +193,25 @@ server <- function(input, output, session) {
   })  
   
   # render a reactive graph with both RAI against each other
+  # switch to log scale based on radio button
+
   output$rai_AB <- renderPlotly({
-    ggplotly(ggplot(data = rai_AB(),
-                    aes(x = log(A), y = log(B), label = Camera)) +
-               geom_point() +
-               geom_smooth(method = "lm", col = "gray") +
-               theme_bw())
+    
+    if(input$log_select == 1) {
+      ggplotly(ggplot(data = rai_AB(),
+                      aes(x = A, y = B, label = Camera)) +
+                 geom_point() +
+                 geom_smooth(method = "lm", col = "gray") +
+                 theme_bw())
+    } else {
+      ggplotly(ggplot(data = rai_AB(),
+                      aes(x = log(A), y = log(B), label = Camera)) +
+                 geom_point() +
+                 geom_smooth(method = "lm", col = "gray") +
+                 theme_bw())      
+    }
+    
+
   })
   
   # render a reactive graph with side-by-side barplot
