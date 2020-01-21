@@ -17,6 +17,7 @@ library(ggmap)
 library(magrittr)
 library(vroom)
 library(sf)
+library(scales)
 
 # setwd() creates problem when trying to publish to shiny.io, so don't run it
 #setwd(here::here("shiny-rai"))
@@ -39,7 +40,10 @@ hexes <- read_sf("shapefile", "CameraGridHexes") %>%
   st_transform(crs = "+proj=longlat +datum=WGS84")
 
 # import record table (vroom is much faster than read_csv!)
-records <- vroom("recordtable_allrecordscleaned_speciesmetadata.csv", delim = ",")
+records <- vroom("recordtable_allrecordscleaned_speciesmetadata.csv", delim = ",") %>%
+  mutate(Species = fct_recode(Species, "Zorilla" = "Pangolin")) %>%
+  mutate(Species = fct_recode(Species, "Suni" = "Lion")) %>% # can't figure out how to recode all in one line; strangely, it worked when I reloaded the app but not when I loaded from scratch. ah well, this works
+  mutate(Species = fct_recode(Species, "Bird" = "Elephant")) 
 records$Date <- as.Date(records$Date)
 
 
