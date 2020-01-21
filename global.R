@@ -181,11 +181,11 @@ rai.calculate <- function(record.table.subset, camop, start.date, end.date) {
     dplyr::group_by(Camera) %>%
     dplyr::summarise(Detections = n())  # counts number of observations of each species
   
-  # replace NA with 0 
-  record_count[is.na(record_count)] <- 0
-  
   # join camera operation dates and observations
-  RAI.table <- plyr::join(record_count, camop)
+  RAI.table <- left_join(camop, record_count)
+  
+  # replace NA with 0 
+  RAI.table[is.na(RAI.table)] <- 0
   
   # calculate RAI
   RAI.table$RAI <- RAI.table$Detections / RAI.table$Operation
@@ -295,7 +295,7 @@ rai.monthly <- function(record.table.subset, camop, start.date, end.date) {
   RAI.table %<>% mutate_if(is.numeric, list(~na_if(., Inf)))
   
   # merge with season
-  RAI.table <- left_join(RAI.table, seasons)
+  RAI.table <- left_join(RAI.table, seasons) %>% as.data.frame()
   
   return(RAI.table)
   
