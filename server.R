@@ -53,6 +53,9 @@ server <- function(input, output, session) {
   pal <- reactive({
     colorNumeric(palette = "viridis", domain = hexes_rai()$RAI)
   })
+  pal_log <- reactive({
+    colorNumeric(palette = "viridis", domain = log(hexes_rai()$RAI + 0.001))
+  })
   
   # create map labels
   map_labels <- reactive({
@@ -65,31 +68,61 @@ server <- function(input, output, session) {
   # generate leaflet map
   output$rai_map <- renderLeaflet({
     
-    leaflet(hexes_rai()) %>%
+    if(input$log_select_map == 1) {
       
-      setView(34.42, -18.95, 11) %>%
-      addTiles() %>% # or satellite image: addProviderTiles(providers$Esri.WorldImagery)
-      
-      addPolygons(
-        data = hexes_rai(),
-        fillColor = ~pal()(hexes_rai()$RAI),
-        fillOpacity = 1, 
-        weight = 1, # stroke weight of lines
-        color = "gray", # color of lines
-        label = map_labels(),
-        highlight = highlightOptions(
-          weight = 2,
-          color = "white",
-          fillOpacity = 1,
-          bringToFront = TRUE)
-      ) %>% 
-
-      addLegend_decreasing(pal = pal(), 
-                           values = ~RAI,
-                           opacity = 1, 
-                           title = "RAI",
-                           position = "topleft",
-                           decreasing = TRUE)
+      leaflet(hexes_rai()) %>%
+        
+        setView(34.42, -18.95, 11) %>%
+        addTiles() %>% # or satellite image: addProviderTiles(providers$Esri.WorldImagery)
+        
+        addPolygons(
+          data = hexes_rai(),
+          fillColor = ~pal()(hexes_rai()$RAI),
+          fillOpacity = 1, 
+          weight = 1, # stroke weight of lines
+          color = "gray", # color of lines
+          label = map_labels(),
+          highlight = highlightOptions(
+            weight = 2,
+            color = "white",
+            fillOpacity = 1,
+            bringToFront = TRUE)
+        ) %>% 
+        
+        addLegend_decreasing(pal = pal(), 
+                             values = ~RAI,
+                             opacity = 1, 
+                             title = "RAI",
+                             position = "topleft",
+                             decreasing = TRUE)
+    } else {
+      leaflet(hexes_rai()) %>%
+        
+        setView(34.42, -18.95, 11) %>%
+        addTiles() %>% # or satellite image: addProviderTiles(providers$Esri.WorldImagery)
+        
+        addPolygons(
+          data = hexes_rai(),
+          fillColor = ~pal_log()(log(hexes_rai()$RAI + 0.001)),
+          fillOpacity = 1, 
+          weight = 1, # stroke weight of lines
+          color = "gray", # color of lines
+          label = map_labels(),
+          highlight = highlightOptions(
+            weight = 2,
+            color = "white",
+            fillOpacity = 1,
+            bringToFront = TRUE)
+        ) %>% 
+        
+        addLegend_decreasing(pal = pal_log(), 
+                             values = ~log(RAI + 0.001),
+                             opacity = 1, 
+                             title = "log(RAI)",
+                             position = "topleft",
+                             decreasing = TRUE)    
+    }
+    
   })
   
   # Render outputs ----------------------------------------------------------
