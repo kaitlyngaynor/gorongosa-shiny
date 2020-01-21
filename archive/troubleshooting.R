@@ -1,15 +1,17 @@
 # test
 
-RAI.test.A <- records %>% 
-  rai.calculate(camera_operation_matrix, "2017-01-01", "2018-01-31") %>%
-  filter(Species == "Waterbuck")
+RAI.test.A <- records %>%
+  filter(Species == "Waterbuck") %>% 
+  rai.calculate(camera_operation_matrix, "2017-01-01", "2018-01-31") 
 
-RAI.test.B <- records %>% 
-  rai.calculate(camera_operation_matrix, "2017-01-01", "2018-01-31") %>%
-  filter(Species == "Baboon")
+RAI.test.B <- records %>%
+  filter(Species == "Baboon")%>% 
+  rai.calculate(camera_operation_matrix, "2017-01-01", "2018-01-31") 
 
 RAI.test.A$Subset <- "A"
 RAI.test.B$Subset <- "B"
+
+RAI.test.A2 <- cbind(RAI.test.A, Subset = "A")
 
 RAI.test.AB <- bind_rows(RAI.test.A, RAI.test.B) %>%
   select(Camera, RAI, Subset) %>%
@@ -23,13 +25,16 @@ ggplotly(ggplot(data = RAI.test.AB,
   theme_bw())
 
 
-RAI.test.monthly.A <- records %>% 
-  rai.monthly(camera_operation_matrix, "2017-01-01", "2018-01-31") %>%
-  filter(Species == "Waterbuck")
+RAI.test.monthly.A <- records %>%
+  filter(Species == "Waterbuck") %>% 
+  rai.monthly(camera_operation_matrix, "2017-01-01", "2018-01-31") 
 
-RAI.test.monthly.B <- records %>% 
-  rai.monthly(camera_operation_matrix, "2017-01-01", "2018-01-31") %>%
-  filter(Species == "Baboon")
+RAI.test.A2 <- cbind(RAI.test.monthly.A, Subset = "A")
+
+
+RAI.test.monthly.B <- records %>%
+  filter(Species == "Baboon") %>% 
+  rai.monthly(camera_operation_matrix, "2017-01-01", "2018-01-31") 
 
 RAI.test.monthly.A$Subset <- "A"
 RAI.test.monthly.B$Subset <- "B"
