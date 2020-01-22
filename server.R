@@ -238,7 +238,7 @@ server <- function(input, output, session) {
                  theme_bw())
     } else {
       ggplotly(ggplot(data = rai_AB(),
-                      aes(x = log(A), y = log(B), label = Camera)) +
+                      aes(x = log(A + 0.001), y = log(B + 0.001), label = Camera)) +
                  geom_point() +
                  geom_smooth(method = "lm", col = "gray") +
                  theme_bw())      

@@ -153,11 +153,13 @@ body <- dashboardBody(
         
         box(title = "Map of Relative Activity Index (RAI) across camera grid",
             collapsible = TRUE,
-            radioButtons(inputId = "log_select_map", label = "Switch to log scale",
-                         choices = list("RAI" = 1, "log(RAI)" = 2), 
-                         selected = 1),
             leafletOutput(outputId = "rai_map"),
-            "Detections per trap-night at each camera. Note that greyed-out hexagons were not operable during the selected period."
+            "Detections per trap-night at each camera. Note that greyed-out hexagons were not operable during the selected period.",
+            "Switch to log scale for easier viewing (small value of 0.001 added to all RAI to address issue with 0s)",
+            radioButtons(inputId = "log_select_map", label = "",
+                         choices = list("RAI" = 1, "log(RAI)" = 2), 
+                         selected = 1)
+            
             ),
         
         box(title = "Environmental covariates of Relative Activity Index",
@@ -264,11 +266,12 @@ body <- dashboardBody(
       fluidRow(
         
         box(title = "Plot of RAI A vs B",
-            radioButtons(inputId = "log_select", label = "Switch to log scale",
-                         choices = list("RAI" = 1, "log(RAI)" = 2), 
-                         selected = 1),
             collapsible = TRUE,
-            plotlyOutput(outputId = "rai_AB")
+            plotlyOutput(outputId = "rai_AB"),
+            "Option to switch to log scale for easier viewing (small value of 0.001 added to all RAI to address issue with 0s)",
+            radioButtons(inputId = "log_select", label = "",
+                         choices = list("RAI" = 1, "log(RAI)" = 2), 
+                         selected = 1)
             )
         
       )
