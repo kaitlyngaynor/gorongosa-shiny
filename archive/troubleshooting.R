@@ -49,3 +49,5 @@ ggplotly(ggplot(data = (RAI.test.monthly.AB %>% filter(Camera == "All")),
            theme(axis.text.x = element_text(angle = 45, hjust = 1)))
          
 
+record.test <- records %>%
+  filter(Species == "Mongoose_dwarf")
