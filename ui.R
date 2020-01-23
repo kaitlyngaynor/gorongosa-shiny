@@ -254,8 +254,9 @@ body <- dashboardBody(
         
         box(title = "Diel overlap",
             collapsible = TRUE,
-            "Overlap of daily activity patterns",
-            plotOutput(outputId = "activity_plot_compare")),
+            textOutput(outputId = "activity_overlap"),
+            plotOutput(outputId = "activity_plot_compare")
+            ),
         
         box(title = "Side-by-side trend over time",
             collapsible = TRUE,

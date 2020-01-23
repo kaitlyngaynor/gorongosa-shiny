@@ -225,6 +225,11 @@ server <- function(input, output, session) {
     legend('top', c("Subset A", "Subset B"), lty=c(1,1), col = c("#F8766D", "#00BFC4"), bty='n')
   })  
   
+  # calculate overlap value
+  output$activity_overlap <- renderText({
+    paste("Overlap of daily activity density (ranging from 0 to 1) = ", round(overlapEst(records_subset_A()$Time.Sun, records_subset_B()$Time.Sun, type = "Dhat4"), digits = 3))
+  })
+  
   # render a reactive graph with both RAI against each other
   # switch to log scale based on radio button
 
