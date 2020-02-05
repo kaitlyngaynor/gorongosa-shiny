@@ -44,3 +44,9 @@ vignettes/*.pdf
 # record table
 recordtable_allrecordscleaned_speciesmetadata.csv
 
+# shapefile
+/shapefile/
+
+# RShiny connect folder
+/rsconnect/
+
