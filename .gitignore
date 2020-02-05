@@ -40,3 +40,6 @@ vignettes/*.pdf
 
 # Mac system files
 *.DS_Store
+
+# record table
+recordtable_allrecordscleaned_speciesmetadata.csv
