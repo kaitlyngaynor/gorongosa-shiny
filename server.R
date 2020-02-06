@@ -145,9 +145,8 @@ server <- function(input, output, session) {
   
   # render a reactive graph with RAI against other variable
   output$rai_metadata <- renderPlotly({
-    x_axis <- input$metadata_select
     ggplotly(ggplot(data = rai_metadata(),
-           aes_string(x = x_axis, y = "RAI", label = "Camera")) +
+           aes_string(x = input$metadata_select, y = "RAI", label = "Camera")) +
       geom_point() +
       geom_smooth(method = "lm", col = "gray") +
       theme_bw()
