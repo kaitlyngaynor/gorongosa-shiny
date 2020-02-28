@@ -121,6 +121,7 @@ body <- dashboardBody(
           title = "Choose a species:",
           selectInput(inputId = "species_select",
                       label = "",
+                      selected = "Waterbuck",
                       choices = sort(unique(records$Species)))
         ),
         
@@ -216,6 +217,7 @@ body <- dashboardBody(
           
           selectInput(inputId = "species_select_A",
                       label = "Choose species for dataset A:",
+                      selected = "Nyala",
                       choices = sort(unique(records$Species))),
           
           dateRangeInput(inputId = "date_range_A",
@@ -235,6 +237,7 @@ body <- dashboardBody(
           
           selectInput(inputId = "species_select_B",
                       label = "Choose species for dataset B:",
+                      selected = "Bushbuck",
                       choices = sort(unique(records$Species))),
           
           dateRangeInput(inputId = "date_range_B",
