@@ -155,7 +155,7 @@ server <- function(input, output, session) {
   
   # render a reactive graph with RAI every month
   output$monthly_rai_hist <- renderPlotly({
-    ggplotly(ggplot(data = (monthly_rai() %>% filter(Camera == "All")),
+    ggplotly(ggplot(data = (monthly_rai()),
            aes(x = Month_Year, y = RAI, fill = Season)) +
       geom_bar(stat = "identity") +
       scale_fill_manual(values=c("#999999", "#F8766D", "#00BFC4")) +
@@ -253,7 +253,7 @@ server <- function(input, output, session) {
   
   # render a reactive graph with side-by-side barplot
   output$rai_monthly_AB <- renderPlotly({
-    ggplotly(ggplot(data = (monthly_rai_AB() %>% filter(Camera == "All")),
+    ggplotly(ggplot(data = (monthly_rai_AB()),
                     aes(x = Month_Year, y = RAI, fill = Subset)) +
                geom_bar(stat = "identity", position = "dodge") +
                scale_fill_manual(values=c("#F8766D", "#00BFC4")) +
