@@ -176,13 +176,13 @@ server <- function(input, output, session) {
   # create reactive object records_subset that changes based on delta time and date range
   records_subset_A <- reactive({
     records %>%
-      filter(delta.time.secs == 0 | delta.time.secs >= (60 * input$independent_min),
+      filter(delta.time.secs == 0 | delta.time.secs >= (60 * input$independent_min_A),
              Date >= input$date_range_A[1], Date <= input$date_range_A[2]) %>%
       filter(Species == input$species_select_A)
   })
   records_subset_B <- reactive({
     records %>%
-      filter(delta.time.secs == 0 | delta.time.secs >= (60 * input$independent_min),
+      filter(delta.time.secs == 0 | delta.time.secs >= (60 * input$independent_min_B),
              Date >= input$date_range_B[1], Date <= input$date_range_B[2]) %>%
       filter(Species == input$species_select_B)
   })
