@@ -216,7 +216,8 @@ record.count.monthly <- function(record.table.subset) {
   record_count <- add_column(record_count, !!!allclassifications[!names(allclassifications) %in% names(record_count)])
   
   # gather data so each class-camera-month is its own row again
-  record_count <- record_count %>% gather(3:ncol(record_count), key = "Species", value = "Count")
+  record_count <- record_count %>% 
+    gather(3:ncol(record_count), key = "Species", value = "Count")
   
   # replace NA with 0 
   record_count[is.na(record_count)] <- 0
@@ -267,10 +268,10 @@ rai.monthly <- function(record.table.subset, camop, start.date, end.date) {
     camop.subset.monthly.summary <- camop.subset.monthly %>%
       dplyr::select(-Camera) %>% # drop date (confusingly called camera due to transposing above)
       pivot_longer(A06:All, names_to = "Camera", values_to = "Operating") %>% # new 'gather' function
-      dplyr::group_by(Camera, Month_Year) %>%
+      dplyr::group_by(Month_Year) %>%
       dplyr::summarise(Operation = sum(Operating, na.rm = TRUE))
   
-  # calculate number of observations of each classification type at each camera
+  # calculate number of observations of each species at each camera
   record_count <- record.table.subset %>%
     dplyr::group_by(Camera, Month_Year) %>%
     dplyr::summarise(Detections = n())  
@@ -299,7 +300,10 @@ rai.monthly <- function(record.table.subset, camop, start.date, end.date) {
   RAI.table %<>% mutate_if(is.numeric, list(~na_if(., Inf)))
   
   # merge with season
-  RAI.table <- left_join(RAI.table, seasons) %>% as.data.frame()
+  RAI.table <- left_join(seasons, RAI.table) %>% as.data.frame()
+  
+  # replace NA with 0 again (set RAI to 0 for blank months)
+  RAI.table[is.na(RAI.table)] <- 0
   
   return(RAI.table)
   
