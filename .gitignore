@@ -50,3 +50,5 @@ recordtable_allrecordscleaned_speciesmetadata.csv
 # RShiny connect folder
 /rsconnect/
 
+*.csv
+
