@@ -6,8 +6,8 @@ library(tidyverse)
 
 # Import and merge record tables ---------------------------------------------
 
-records1 <- read_csv(here::here('data', 'raw-data', 'recordtable_year1_allrecordscleaned.csv'))
-records2 <- read_csv(here::here('data', 'raw-data', 'recordtable_year2_allrecordscleaned.csv'))
+records1 <- read_csv("~/Documents/github-repos/gorongosa/gorongosa-camera-traps/data/raw-data/recordtable_year1_allrecordscleaned.csv")
+records2 <- read_csv("~/Documents/github-repos/gorongosa/gorongosa-camera-traps/data/raw-data/recordtable_year2_allrecordscleaned.csv")
 records <- rbind(records1, records2)
 
 
@@ -33,7 +33,7 @@ records$Time.Sun <- sunTime(records$Time.Radians, records$Date, coords)
 
 # Drop records outside of operation dates ------------------------------------------------------------
 
-metadata <- read_csv(here::here('data', 'Camera_operation_years1and2.csv'))
+metadata <- read_csv("~/Documents/github-repos/gorongosa/gorongosa-camera-traps/data/Camera_operation_years1and2.csv")
 
 # get the dates into date format
 metadata[, 2:ncol(metadata)] <- lapply(metadata[, 2:ncol(metadata)], as.Date, format = "%m/%d/%y")
@@ -47,7 +47,11 @@ for (i in 1:nrow(records)) {
     records$drop[i] <- TRUE}
   else if (records$Date[i] > records$End[i]) {
     records$drop[i] <- TRUE}
-  else if ((is.na(records$Problem1_from[i]) = FALSE) & (records$Date[i] > records$Problem1_from[i]) & (records$Date[i] < records$Problem1_to[i])) {
+  else if ((is.na(records$Problem1_from[i]) == FALSE) & (records$Date[i] > records$Problem1_from[i]) & (records$Date[i] < records$Problem1_to[i])) {
+    records$drop[i] <- TRUE}
+  else if ((is.na(records$Problem2_from[i]) == FALSE) & (records$Date[i] > records$Problem2_from[i]) & (records$Date[i] < records$Problem2_to[i])) {
+    records$drop[i] <- TRUE}
+  else if ((is.na(records$Problem3_from[i]) == FALSE) & (records$Date[i] > records$Problem3_from[i]) & (records$Date[i] < records$Problem3_to[i])) {
     records$drop[i] <- TRUE}
   else {
     records$drop[i] <- FALSE}
@@ -64,7 +68,7 @@ records <- select(records, Camera, Species, DateTimeOriginal, Date, Time, delta.
 # Merge with species metadata ---------------------------------------------
 
 # bring in species traits
-species <- read_csv(here::here('data', '2018spp_kingdon.csv')) %>%
+species <- read_csv("~/Documents/github-repos/gorongosa/gorongosa-camera-traps/data/2018spp_kingdon.csv") %>%
   rename(Species = CommName) # rename to match name of column in records
 
 # join records and traits
@@ -76,4 +80,4 @@ records <- drop_na(records, CommName_Full)
 
 # Export cleaned file ---------------------------------------------
 
-write_csv(records, here::here('shiny-rai', 'recordtable_allrecordscleaned_speciesmetadata.csv'))
+write_csv(records, here::here('recordtable_allrecordscleaned_speciesmetadata.csv'))
