@@ -51,4 +51,6 @@ recordtable_allrecordscleaned_speciesmetadata.csv
 /rsconnect/
 
 *.csv
+archive/
+modules/
 
