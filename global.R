@@ -57,7 +57,7 @@ camera_operation <- read_csv("Camera_operation_years1and2.csv") %>%
             ~as.Date(., format = "%m/%d/%y"))
 
 # import camera metadata
-camera_metadata <- read.csv("cam_metadata_norm_031519.csv") %>%
+camera_metadata <- read.csv("cam_metadata_fromfield_and_raw_raster.csv") %>%
   rename(Camera = StudySite) # records and camera_operation use "Camera" not "StudySite" so this allows them to join
 
 # specify seasons for each month-year

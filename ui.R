@@ -167,10 +167,9 @@ body <- dashboardBody(
             collapsible = TRUE,
             selectInput(inputId = "metadata_select",
                         label = "Choose an environmental covariate:",
-                        choices = c("tree.hansen", "termite.large.count.50m", "termite.large.count.100m", "urema.distance", 
-                                    "river.distance", "road.major.distance", "boundary.distance", "fire.interval", 
-                                    "pans.100m", "pans.250m", "pans.500m", "lion.dry", 
-                                    "lion.wet", "termites.100m", "termites.250m", "termites.500m", "termites.1km")),
+                        choices = c("habitat.number", "tree_hansen", "urema_dist", "fire_frequency", "road_dist", "road_major_dist", 
+                                    "pans_dist", "chitengo_dist", "boundary_dist", "pans_250m", "pans_conservative_250m", "pans_large_250m",
+                                    "termite.count.100m", "termite.count.50m", "termite.large.count.100m", "termite.large.count.50m")),
             
             plotlyOutput(outputId = "rai_metadata"),
             "All covariates have been standardized to have a mean of 0 and standard deviation of 1 in the study area,
