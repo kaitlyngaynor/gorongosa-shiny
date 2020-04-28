@@ -172,9 +172,7 @@ body <- dashboardBody(
                                     "termite.count.100m", "termite.count.50m", "termite.large.count.100m", "termite.large.count.50m")),
             
             plotlyOutput(outputId = "rai_metadata"),
-            "All covariates have been standardized to have a mean of 0 and standard deviation of 1 in the study area,
-            so x-axis units are meaningless.
-            Let me know if you are interested in how these data layers were generated."
+            "All distance covariates are in meters. Let me know if you are interested in how these data layers were generated, or have additional spatial covariates to contribute."
         )
 
       ),
