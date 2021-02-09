@@ -51,10 +51,11 @@ body <- dashboardBody(
       fluidRow(
         box(width = 12,
           h1("Gorongosa Camera Traps"),
-          "This dashboard facilitates exploration of the first two years of camera trap data (mid-2016 through mid-2018) 
-          from the systematic grid in Gorongosa National Park, Mozambique. I (Kaitlyn Gaynor) collected 
-          and classified these data as part of my PhD research at the University of California - Berkeley,
-          supervised by Justin Brashares.")
+          "This dashboard facilitates exploration of the first three years of camera trap data (mid-2016 through mid-2019) 
+          from the systematic grid in Gorongosa National Park, Mozambique. Kaitlyn Gaynor collected 
+          and classified the 2016-2018 data as part of her PhD research at the University of California - Berkeley,
+          supervised by Justin Brashares. Meredith Palmer led the collection of the 2018-2019 data, which were classified
+          by volunteers on WildCam Gorongosa.")
       ),
       
       fluidRow(
@@ -85,7 +86,8 @@ body <- dashboardBody(
             A. Wu, E. Lai, A. Ke, M. Levy, C. Jurgensen, and M. Silverberg, and thanks to the citizen scientists of WildCam Gorongosa. 
             J. Daskin and M. Stalmans provided many of the spatial data layers and D. Gonçalves collected the participatory mapping data 
             on hunting. We are grateful to the Brashares Group and Pringle Group for their feedback on this project. Funding for this work 
-            came from the National Science Foundation, Schmidt Science Fellows, the Rufford Foundation, the Explorers Club Mamont Scholars 
+            came from the National Science Foundation, Schmidt Science Fellows in partnership with Rhodes Trust, 
+            the National Center for Ecological Analysis and Synthesis, the Rufford Foundation, the Explorers Club Mamont Scholars 
             Program, Animal Behavior Society, IdeaWild, UC Center for African Studies Rocca Fellowship, UC Institute for International Studies, 
             Sigma Xi Berkeley Chapter, and B. Alireza.",
             div(img(src="http://www.kaitlyngaynor.com/uploads/2/8/0/3/28034347/published/gnp-logo.png?1563238709", width=100),
@@ -131,7 +133,7 @@ body <- dashboardBody(
           dateRangeInput(inputId = "date_range",
                          label = "Date Range:",
                          start = "2016-07-01",
-                         end = "2018-08-31"),
+                         end = "2019-08-31"),
           "The first camera was set on June 23, 2016, and the last camera was checked on September 15, 2018. 
           If you choose dates outside of this range, it will generate an error.
           No individual camera was operable for this entire period.",
