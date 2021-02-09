@@ -41,9 +41,9 @@ hexes <- read_sf("shapefile", "CameraGridHexes") %>%
 
 # import record table (vroom is much faster than read_csv!)
 records <- vroom("recordtable_allrecordscleaned_speciesmetadata.csv", delim = ",") %>%
-  mutate(Species = fct_recode(Species, "Zorilla" = "Pangolin")) %>%
-  mutate(Species = fct_recode(Species, "Suni" = "Lion")) %>% # can't figure out how to recode all in one line; strangely, it worked when I reloaded the app but not when I loaded from scratch. ah well, this works
-  mutate(Species = fct_recode(Species, "Bird" = "Elephant")) 
+  mutate(Species = fct_recode(Species, "zorilla" = "pangolin")) %>%
+  mutate(Species = fct_recode(Species, "suni" = "lion")) %>% # can't figure out how to recode all in one line; strangely, it worked when I reloaded the app but not when I loaded from scratch. ah well, this works
+  mutate(Species = fct_recode(Species, "bird" = "elephant")) 
 records$Date <- as.Date(records$Date)
 
 
@@ -51,9 +51,11 @@ records$Date <- as.Date(records$Date)
 records$Month_Year <- format(as.Date(records$Date), "%Y-%m")
 
 # import camera operation spreadsheet
-camera_operation <- read_csv("Camera_operation_years1and2.csv") %>%
+camera_operation <- read_csv("Camera_operation_year1-4_consolidated.csv") %>%
   mutate_at(c("Start", "End", "Problem1_from", "Problem1_to",
-              "Problem2_from", "Problem2_to", "Problem3_from", "Problem3_to"),
+              "Problem2_from", "Problem2_to", "Problem3_from", 
+              "Problem3_to", "Problem4_from", "Problem4_to",
+              "Problem5_from", "Problem5_to"),
             ~as.Date(., format = "%m/%d/%y"))
 
 # import camera metadata
@@ -66,12 +68,16 @@ seasons <- tibble(
                  "2017-01", "2017-02", "2017-03", "2017-04", "2017-05",
                  "2017-06", "2017-07", "2017-08", "2017-09", "2017-10", "2017-11", "2017-12",
                  "2018-01", "2018-02", "2018-03", "2018-04", "2018-05",
-                 "2018-06", "2018-07", "2018-08", "2018-09", "2018-10", "2018-11", "2018-12"),
+                 "2018-06", "2018-07", "2018-08", "2018-09", "2018-10", "2018-11", "2018-12",
+                 "2019-01", "2019-02", "2019-03", "2019-04", "2019-05",
+                 "2019-06", "2019-07", "2019-08", "2019-09", "2019-10"),
   Season = c("Early Dry", "Early Dry", "Late Dry", "Late Dry", "Late Dry", "Late Dry", "Wet",
              "Wet", "Wet", "Wet", "Early Dry", "Early Dry",
              "Early Dry", "Early Dry", "Late Dry", "Late Dry", "Late Dry", "Late Dry", "Wet",
              "Wet", "Wet", "Wet", "Early Dry", "Early Dry",
-             "Early Dry", "Early Dry", "Late Dry", "Late Dry", "Late Dry", "Late Dry", "Wet")
+             "Early Dry", "Early Dry", "Late Dry", "Late Dry", "Late Dry", "Late Dry", "Wet",
+             "Wet", "Wet", "Wet", "Early Dry", "Early Dry",
+             "Early Dry", "Early Dry", "Late Dry", "Late Dry", "Late Dry")
 )
 
 
@@ -153,16 +159,16 @@ overlapPlot2 <- function (A, B, xscale = 24, linetype = c(1, 1), linecol = c("#F
 
 # Define unique classification categories. We will need this later to ensure these columns are present in all tables
 # There is probably a better way to do this that is not so hard-coded and uses unique(records$Species) but I can't figure it out
-allclassifications <- c(Aardvark = NA_real_, Baboon = NA_real_, Buffalo = NA_real_, Bushbaby = NA_real_, 
-                        Bushbuck = NA_real_, Bushpig = NA_real_, Civet = NA_real_, Duiker_common = NA_real_, 
-                        Duiker_red = NA_real_, Eland = NA_real_, Elephant = NA_real_, Genet = NA_real_, 
-                        Hare = NA_real_, Hartebeest = NA_real_, Hippo = NA_real_, Honey_badger = NA_real_, 
-                        Impala = NA_real_, Kudu = NA_real_, Lion = NA_real_, Mongoose_banded = NA_real_, 
-                        Mongoose_bushy_tailed = NA_real_, Mongoose_dwarf = NA_real_, Mongoose_large_grey = NA_real_,
-                        Mongoose_marsh = NA_real_, Mongoose_slender = NA_real_, Mongoose_white_tailed = NA_real_,
-                        Nyala = NA_real_, Oribi = NA_real_, Pangolin = NA_real_, Porcupine = NA_real_, 
-                        Reedbuck = NA_real_, Sable_antelope = NA_real_, Samango = NA_real_, Serval = NA_real_, 
-                        Vervet = NA_real_, Warthog = NA_real_, Waterbuck = NA_real_, Wildebeest = NA_real_)  
+allclassifications <- c(aardvark = NA_real_, baboon = NA_real_, buffalo = NA_real_, bushbaby = NA_real_, 
+                        bushbuck = NA_real_, bushpig = NA_real_, civet = NA_real_, duiker_common = NA_real_, 
+                        duiker_red = NA_real_, eland = NA_real_, elephant = NA_real_, genet = NA_real_, 
+                        hare = NA_real_, hartebeest = NA_real_, hippo = NA_real_, honey_badger = NA_real_, 
+                        impala = NA_real_, kudu = NA_real_, lion = NA_real_, mongoose_banded = NA_real_, 
+                        mongoose_bushy_tailed = NA_real_, mongoose_dwarf = NA_real_, mongoose_large_grey = NA_real_,
+                        mongoose_marsh = NA_real_, mongoose_slender = NA_real_, mongoose_white_tailed = NA_real_,
+                        nyala = NA_real_, oribi = NA_real_, pangolin = NA_real_, porcupine = NA_real_, 
+                        reedbuck = NA_real_, sable_antelope = NA_real_, samango = NA_real_, serval = NA_real_, 
+                        vervet = NA_real_, warthog = NA_real_, waterbuck = NA_real_, wildebeest = NA_real_)  
 
 # define RAI calculation function - using record table that has ALREADY BEEN SUBSET
 
