@@ -29,6 +29,37 @@ records$Time.Radians <- records$Time.Scaled * 2 * pi
 records$Time.Sun <- sunTime(records$Time.Radians, records$Date, coords)
 
 
+
+# Calculate time difference -----------------------------------------------
+
+# sort records by station, species, then time
+records <- records[order(records$Camera, records$species, records$datetime),]
+
+# format dates
+records$datetime <- as.POSIXct(records$datetime)
+
+# run loop to calculate delta time
+records$delta.time.secs <- NA # create column for delta time
+records$delta.time.secs[[1]] <- 0 # set first row to 0
+for (i in 2:nrow(records)) {
+  
+  if(records$Camera[[i]] == records$Camera[[i-1]] &
+     records$species[[i]] == records$species[[i-1]]) {
+    
+    # calculate difference 
+    records$delta.time.secs[[i]] <- difftime(records$datetime[[i]], 
+                                             records$datetime[[i-1]], 
+                                             units = "secs")
+    
+  } else {
+    
+    records$delta.time.secs[[i]] <- 0
+    
+  }
+  
+}
+
+
 # Drop records outside of operation dates ------------------------------------------------------------
 
 metadata <- read_csv("Camera_operation_year1-4_consolidated.csv")
@@ -73,28 +104,24 @@ records <- records %>%
          Time = time,
          DateTimeOriginal = datetime)
 
-
-records <- records %>% 
-  rename(
-         DateTimeOriginal = datetime)
-
 # take only columns we want/need
 records <- select(records, Camera, Species, DateTimeOriginal, Date, Time, delta.time.secs, Time.Sun)
-#records <- select(records, Camera, Species, DateTimeOriginal, Date, Time, delta.time.secs, Time.Sun)
+
 
 # Merge with species metadata ---------------------------------------------
 
 # bring in species traits
 species <- read_csv("~/Documents/github-repos/gorongosa/gorongosa-camera-traps/data/2018spp_kingdon.csv") %>%
-  rename(Species = CommName) # rename to match name of column in records
-
+  rename(Species = CommName) %>%  # rename to match name of column in records
+  mutate(Species = tolower(Species)) # make lowercase to match MP format
+  
 # join records and traits
-records <- left_join(records, species)
+records2 <- left_join(records, species)
 
 # remove those with NA for common name full (this includes setup, ghost, unknown)
-records <- drop_na(records, CommName_Full)
+records2 <- drop_na(records2, CommName_Full)
 
 
 # Export cleaned file ---------------------------------------------
 
-write_csv(records, here::here('recordtable_allrecordscleaned_speciesmetadata.csv'))
+write_csv(records2, here::here('recordtable_allrecordscleaned_speciesmetadata.csv'))
