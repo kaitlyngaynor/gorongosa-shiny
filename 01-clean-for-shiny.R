@@ -121,6 +121,9 @@ records2 <- left_join(records, species)
 # remove those with NA for common name full (this includes setup, ghost, unknown)
 records2 <- drop_na(records2, CommName_Full)
 
+# subset columns to make file smaller
+records2 <- records2 %>% 
+  dplyr::select(Camera, Species, delta.time.secs, Date, Time.Sun, SppCode, CommName_Full)
 
 # Export cleaned file ---------------------------------------------
 
