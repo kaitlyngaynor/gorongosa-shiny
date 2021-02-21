@@ -51,11 +51,10 @@ records$Date <- as.Date(records$Date)
 records$Month_Year <- format(as.Date(records$Date), "%Y-%m")
 
 # import camera operation spreadsheet
-camera_operation <- read_csv("Camera_operation_year1-4_consolidated.csv") %>%
+camera_operation <- read_csv("Camera_operation_years1-4_consolidated.csv") %>%
   mutate_at(c("Start", "End", "Problem1_from", "Problem1_to",
               "Problem2_from", "Problem2_to", "Problem3_from", 
-              "Problem3_to", "Problem4_from", "Problem4_to",
-              "Problem5_from", "Problem5_to"),
+              "Problem3_to", "Problem4_from", "Problem4_to"),
             ~as.Date(., format = "%m/%d/%y"))
 
 # import camera metadata
