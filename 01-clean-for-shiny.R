@@ -62,7 +62,7 @@ for (i in 2:nrow(records)) {
 
 # Drop records outside of operation dates ------------------------------------------------------------
 
-metadata <- read_csv("Camera_operation_year1-4_consolidated.csv")
+metadata <- read_csv("Camera_operation_years1-4_consolidated.csv")
 
 # get the dates into date format
 metadata[, 2:ncol(metadata)] <- lapply(metadata[, 2:ncol(metadata)], as.Date, format = "%m/%d/%y")
