@@ -40,7 +40,7 @@ hexes <- read_sf("shapefile", "CameraGridHexes") %>%
   st_transform(crs = "+proj=longlat +datum=WGS84")
 
 # import record table (vroom is much faster than read_csv!)
-records <- vroom("recordtable_allrecordscleaned", delim = ",") %>%
+records <- vroom("recordtable_allrecordscleaned.csv", delim = ",") %>%
   mutate(Species = fct_recode(Species, "zorilla" = "pangolin")) %>%
   mutate(Species = fct_recode(Species, "suni" = "lion")) %>% # can't figure out how to recode all in one line; strangely, it worked when I reloaded the app but not when I loaded from scratch. ah well, this works
   mutate(Species = fct_recode(Species, "bird" = "elephant")) 
