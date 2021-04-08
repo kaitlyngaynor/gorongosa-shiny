@@ -127,4 +127,4 @@ records2 <- records2 %>%
 
 # Export cleaned file ---------------------------------------------
 
-write_csv(records2, here::here('recordtable_allrecordscleaned_speciesmetadata.csv'))
+write_csv(records2, here::here('recordtable_allrecordscleaned.csv'))
