@@ -59,6 +59,20 @@ for (i in 2:nrow(records)) {
   
 }
 
+# trying to see if there's an issue with the delta.time.secs (see MP email)
+
+# test <- records %>% 
+#   filter(delta.time.secs == 0 | delta.time.secs >= (60 * 15)) 
+#      
+# 
+# records$index <- seq(1:nrow(records))
+# 
+# records$delta.time.mins <- NA
+# records$delta.time.mins <- unlist(tapply(records$datetime, INDEX = records$index,
+#                                          FUN = function(x) c(0, `units<-`(diff(x), "mins"))))
+# test2 <- records %>% 
+#   filter(delta.time.mins == 0 | delta.time.mins >= 15)
+
 
 # Drop records outside of operation dates ------------------------------------------------------------
 
