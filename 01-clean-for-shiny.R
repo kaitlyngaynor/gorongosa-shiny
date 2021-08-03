@@ -32,6 +32,11 @@ records$Time.Sun <- sunTime(records$Time.Radians, records$Date, coords)
 
 # Calculate time difference -----------------------------------------------
 
+# drop duplicate rows because the seconds all disappeared for the 2019 data
+records$tag <- paste(records$Camera, records$species, records$datetime)
+records <- records[!duplicated(records$tag),]
+nrow(records)
+
 # sort records by station, species, then time
 records <- records[order(records$Camera, records$species, records$datetime),]
 
